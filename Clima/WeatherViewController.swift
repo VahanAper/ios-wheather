@@ -19,6 +19,7 @@ class WeatherViewController: UIViewController, CLLocationManagerDelegate {
 
     // instance variables
     let locationManager = CLLocationManager()
+    let weatherDataModel = WeatherDataModel()
     
     // Pre-linked IBOutlets
     @IBOutlet weak var weatherIcon: UIImageView!
@@ -62,21 +63,31 @@ class WeatherViewController: UIViewController, CLLocationManagerDelegate {
     /***************************************************************/
    
     func updateWeatherData(json: JSON) {
-        let temperature = json["main"]["temp"]
+        if let temperature = json["main"]["temp"].double {
+            let city = json["name"].stringValue
+            let condition = json["weather"][0]["id"].intValue
+            
+            weatherDataModel.temperature = Int(temperature - 273.15)
+            weatherDataModel.city = city
+            weatherDataModel.condition = condition
+            weatherDataModel.weatherIconName = weatherDataModel.updateWeatherIcon(condition: condition)
+            
+            updateUIWithWeatherData()
+        }
+        else {
+            cityLabel.text = "Weather is unavailable"
+        }
         
-        print(temperature)
     }
     
     //MARK: - UI Updates
     /***************************************************************/
     
-    
-    //Write the updateUIWithWeatherData method here:
-    
-    
-    
-    
-    
+    func updateUIWithWeatherData() {
+        cityLabel.text = weatherDataModel.city
+        temperatureLabel.text = String(weatherDataModel.temperature)
+        weatherIcon.image = UIImage(named: weatherDataModel.weatherIconName)
+    }
     
     //MARK: - Location Manager Delegate Methods
     /***************************************************************/
@@ -106,7 +117,7 @@ class WeatherViewController: UIViewController, CLLocationManagerDelegate {
     func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
         print(error)
         
-        cityLabel.text = "Location is  unavailable"
+        cityLabel.text = "Location is unavailable"
     }
     
     

@@ -8,11 +8,12 @@
 
 import UIKit
 import CoreLocation
+import Alamofire
 
 class WeatherViewController: UIViewController, CLLocationManagerDelegate {
     
     // Constants
-    let WEATHER_URL = "http://api.openweathermap.org/data/2.5/weather"
+    let WEATHER_URL = "https://api.openweathermap.org/data/2.5/weather"
     let APP_ID = "2d538d5a0c3ed45b51a87ffa00ee4ba8"
 
     // instance variables
@@ -39,7 +40,20 @@ class WeatherViewController: UIViewController, CLLocationManagerDelegate {
     //MARK: - Networking
     /***************************************************************/
     
-    //Write the getWeatherData method here:
+    func getWeatherData(url: String, params: [String: String]) {
+        Alamofire.request(url, method: .get, parameters: params).responseJSON {
+            response in
+            
+            if response.result.isSuccess {
+                print("Success")
+            }
+            else {
+                print("Error: \(response.result.error ?? "Unknown Error!" as! Error)")
+                
+                self.cityLabel.text = "Connection issues..."
+            }
+        }
+    }
     
 
     
@@ -86,7 +100,9 @@ class WeatherViewController: UIViewController, CLLocationManagerDelegate {
                 "lat": latitude,
                 "lon": longitude,
                 "appid": APP_ID
-            ] 
+            ]
+            
+            getWeatherData(url: WEATHER_URL, params: params)
         }
     }
     
